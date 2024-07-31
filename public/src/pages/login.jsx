@@ -32,11 +32,8 @@ export default function Login() {
 
   const handleValidation = () => {
     const { username, password } = values;
-    if (username === "") {
-      toast.error("username and Password is required.", toastOptions);
-      return false;
-    } else if (password === "") {
-      toast.error("username and Password is required.", toastOptions);
+    if (username === "" || password === "") {
+      toast.error("Username and Password are required.", toastOptions);
       return false;
     }
     return true;
@@ -67,7 +64,7 @@ export default function Login() {
           navigate("/");
         }
       } catch (error) {
-        toast.error("login failed. Please try again.", toastOptions);
+        toast.error("Login failed. Please try again.", toastOptions);
         console.error(error); 
       }
     }
@@ -96,7 +93,7 @@ export default function Login() {
           />
           <button type="submit">Log In</button>
           <span>
-            Don't have an account ? <Link to="/register">Create One.</Link>
+            Don't have an account? <Link to="/register">Create One.</Link>
           </span>
         </form>
       </FormContainer>
@@ -134,7 +131,6 @@ const FormContainer = styled.div`
     flex-direction: column;
     gap: 2rem;
     background-color: white;
-    background: transparent; /* Corrected spelling */
     border-radius: 2rem;
     padding: 3rem 5rem;
   }
@@ -144,7 +140,7 @@ const FormContainer = styled.div`
     padding: 1rem;
     border: 0.1rem solid #4e0eff;
     border-radius: 0.4rem;
-    color: black; /* Changed from white to black for better visibility */
+    color: black;
     width: 100%;
     font-size: 1rem;
     &:focus {
@@ -171,7 +167,7 @@ const FormContainer = styled.div`
   }
   
   span {
-    color: black; /* Changed from white to black for better visibility */
+    color: black;
     text-transform: uppercase;
     a {
       color: #4e0eff;

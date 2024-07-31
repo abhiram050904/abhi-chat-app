@@ -31,7 +31,6 @@ export default function ChatContainer({ currentChat, currentUser, socket }) {
       to: currentChat._id,
       message: msg,
     });
-    const data = await JSON.parse(localStorage.getItem('chat-app-user'));
     socket.current.emit("send-msg", {
       to: currentChat._id,
       from: currentUser._id,
@@ -81,7 +80,7 @@ export default function ChatContainer({ currentChat, currentUser, socket }) {
           </div>
 
           <div className="chat-messages">
-            {messages.map((message, index) => (
+            {messages.map((message) => (
               <div
                 key={uuidv4()} // using uuidv4 to ensure unique keys
                 className={`message ${message.fromSelf ? "sended" : "received"}`}
@@ -113,7 +112,7 @@ const Container = styled.div`
     justify-content: space-between;
     align-items: center;
     padding: 0 2rem;
-    background-color:#DAF7A6;
+    background-color: #DAF7A6;
     .user-details {
       display: flex;
       align-items: center;
