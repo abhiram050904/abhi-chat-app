@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import Logo from "../assets/logo.png";
 import { ToastContainer, toast } from "react-toastify";
@@ -24,11 +24,12 @@ export default function Login() {
     password: "",
   });
 
-  useEffect(() => {
+  // Check if user is already logged in
+  const checkIfLoggedIn = () => {
     if (localStorage.getItem('chat-app-user')) {
       navigate("/");
     }
-  }, [navigate]);
+  };
 
   const handleValidation = () => {
     const { username, password } = values;
@@ -69,6 +70,9 @@ export default function Login() {
       }
     }
   };
+
+  // Run this function on component mount
+  checkIfLoggedIn();
 
   return (
     <>
