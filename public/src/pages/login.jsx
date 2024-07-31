@@ -1,16 +1,15 @@
-import React, { useState } from 'react';
-import styled from 'styled-components';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import styled from "styled-components";
+import { useNavigate, Link } from "react-router-dom";
 import Logo from "../assets/logo.png";
 import { ToastContainer, toast } from "react-toastify";
-import axios from "axios";
-import { useNavigate, Link } from "react-router-dom";
 import "react-toastify/dist/ReactToastify.css";
 import { LoginRoute } from "../utils/APIRoutes";
 
 export default function Login() {
-
   const navigate = useNavigate();
-  
+  const [values, setValues] = useState({ username: "", password: "" });
   const toastOptions = {
     position: "bottom-right",
     autoClose: 8000,
@@ -19,68 +18,58 @@ export default function Login() {
     theme: "dark",
   };
 
-  const [values, setValues] = useState({
-    username: "",
-    password: "",
-  });
+  useEffect(() => {
+    const checkLoginStatus = () => {
+      if (localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)) {
+        navigate("/");
+      }
+    };
 
-  // Check if user is already logged in
-  const checkIfLoggedIn = () => {
-    if (localStorage.getItem('chat-app-user')) {
-      navigate("/");
-    }
-  };
-
-  const handleValidation = () => {
-    const { username, password } = values;
-    if (username === "" || password === "") {
-      toast.error("Username and Password are required.", toastOptions);
-      return false;
-    }
-    return true;
-  };
+    checkLoginStatus();
+  }, [navigate]);
 
   const handleChange = (event) => {
     setValues({ ...values, [event.target.name]: event.target.value });
   };
 
+  const validateForm = () => {
+    const { username, password } = values;
+    if (username === "") {
+      toast.error("Username is required.", toastOptions);
+      return false;
+    } else if (password === "") {
+      toast.error("Password is required.", toastOptions);
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
-    if (handleValidation()) {
+    if (validateForm()) {
       const { username, password } = values;
       try {
-        const { data } = await axios.post(LoginRoute, {
-          username,
-          password,
-        });
-
+        const { data } = await axios.post(LoginRoute, { username, password });
         if (data.status === false) {
           toast.error(data.msg, toastOptions);
-        }
-        if (data.status === true) {
-          localStorage.setItem(
-            'chat-app-user',
-            JSON.stringify(data.user)
-          );
+        } else if (data.status === true) {
+          localStorage.setItem(process.env.REACT_APP_LOCALHOST_KEY, JSON.stringify(data.user));
           navigate("/");
         }
       } catch (error) {
-        toast.error("Login failed. Please try again.", toastOptions);
-        console.error(error); 
+        toast.error("An error occurred. Please try again.", toastOptions);
+        console.error(error);
       }
     }
   };
 
-  // Run this function on component mount
-  checkIfLoggedIn();
-
   return (
     <>
       <FormContainer>
-        <form action="" onSubmit={(event) => handleSubmit(event)}>
+        <form onSubmit={(event) => handleSubmit(event)}>
           <div className="brand">
             <img src={Logo} alt="logo" />
-            <h1>Abhigram</h1>
+            <h1>snappy</h1>
           </div>
           <input
             type="text"

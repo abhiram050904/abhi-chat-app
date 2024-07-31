@@ -1,16 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import styled from 'styled-components';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import styled from "styled-components";
+import { useNavigate, Link } from "react-router-dom";
 import Logo from "../assets/logo.png";
 import { ToastContainer, toast } from "react-toastify";
-import axios from "axios";
-import { useNavigate, Link } from "react-router-dom";
 import "react-toastify/dist/ReactToastify.css";
 import { registerRoute } from "../utils/APIRoutes";
 
 export default function Register() {
-
   const navigate = useNavigate();
-  
   const toastOptions = {
     position: "bottom-right",
     autoClose: 8000,
@@ -27,10 +25,14 @@ export default function Register() {
   });
 
   useEffect(() => {
-    if (localStorage.getItem('chat-app-user')) {
+    if (localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)) {
       navigate("/");
     }
   }, [navigate]);
+
+  const handleChange = (event) => {
+    setValues({ ...values, [event.target.name]: event.target.value });
+  };
 
   const handleValidation = () => {
     const { password, confirmPassword, username, email } = values;
@@ -41,17 +43,13 @@ export default function Register() {
       toast.error("Username should be greater than 3 characters.", toastOptions);
       return false;
     } else if (password.length < 8) {
-      toast.error("Password should be equal or greater than 8 characters.", toastOptions);
+      toast.error("Password should be 8 characters or longer.", toastOptions);
       return false;
     } else if (email === "") {
       toast.error("Email is required.", toastOptions);
       return false;
     }
     return true;
-  };
-
-  const handleChange = (event) => {
-    setValues({ ...values, [event.target.name]: event.target.value });
   };
 
   const handleSubmit = async (event) => {
@@ -67,17 +65,15 @@ export default function Register() {
 
         if (data.status === false) {
           toast.error(data.msg, toastOptions);
-        }
-        if (data.status === true) {
+        } else if (data.status === true) {
           localStorage.setItem(
-            'chat-app-user',
+            process.env.REACT_APP_LOCALHOST_KEY,
             JSON.stringify(data.user)
           );
           navigate("/");
         }
       } catch (error) {
-        toast.error("Registration failed. Please try again.", toastOptions);
-        console.error(error); 
+        toast.error("Something went wrong. Please try again later.", toastOptions);
       }
     }
   };
@@ -88,31 +84,35 @@ export default function Register() {
         <form onSubmit={handleSubmit}>
           <div className="brand">
             <img src={Logo} alt="logo" />
-            <h1>Abhigram</h1>
+            <h1>snappy</h1>
           </div>
           <input
             type="text"
             placeholder="Username"
             name="username"
             onChange={handleChange}
+            required
           />
           <input
             type="email"
             placeholder="Email"
             name="email"
             onChange={handleChange}
+            required
           />
           <input
             type="password"
             placeholder="Password"
             name="password"
             onChange={handleChange}
+            required
           />
           <input
             type="password"
             placeholder="Confirm Password"
             name="confirmPassword"
             onChange={handleChange}
+            required
           />
           <button type="submit">Create User</button>
           <span>
@@ -123,7 +123,7 @@ export default function Register() {
       <ToastContainer />
     </>
   );
-};
+}
 
 const FormContainer = styled.div`
   height: 100vh;
@@ -134,7 +134,6 @@ const FormContainer = styled.div`
   gap: 1rem;
   align-items: center;
   background-color: white;
-
 
   .brand {
     display: flex;
@@ -154,12 +153,11 @@ const FormContainer = styled.div`
     display: flex;
     flex-direction: column;
     gap: 2rem;
-    background-color: rgba(0, 0, 0, 0.01);
-    background:transperent
+    background: transparent; /* Fixed typo here */
     border-radius: 2rem;
     padding: 3rem 5rem;
   }
-  
+
   input {
     background-color: transparent;
     padding: 1rem;
@@ -184,13 +182,13 @@ const FormContainer = styled.div`
     border-radius: 0.4rem;
     font-size: 1rem;
     text-transform: uppercase;
-    transition: background-color 0.3s ease; 
-    
+    transition: background-color 0.3s ease;
+
     &:hover {
-      background-color: #997af0; 
+      background-color: #997af0;
     }
   }
-  
+
   span {
     color: black;
     text-transform: uppercase;

@@ -1,28 +1,34 @@
-import styled from "styled-components";
+import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import React, { useEffect, useState,useRef } from "react";
-import { allUsersRoute,host } from "../utils/APIRoutes";
+import { io } from "socket.io-client";
+import styled from "styled-components";
+import { allUsersRoute, host } from "../utils/APIRoutes";
+import ChatContainer from "../components/ChatContainer";
 import Contacts from "../components/Contacts";
 import Welcome from "../components/Welcome";
-import ChatContainer from "../components/ChatContainer";
-import {io} from "socket.io-client";
-const Chat = () => {
+import Logout from "../components/Logout";
+
+export default function Chat() {
   const navigate = useNavigate();
-  const socket=useRef();
+  const socket = useRef();
   const [contacts, setContacts] = useState([]);
   const [currentChat, setCurrentChat] = useState(undefined);
   const [currentUser, setCurrentUser] = useState(undefined);
-  const [isLoaded,setIsLoaded]=useState(false);
+
   useEffect(() => {
     const fetchUser = async () => {
-      if (!localStorage.getItem("chat-app-user")) {
+      if (!localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)) {
         navigate("/login");
       } else {
-        setCurrentUser(await JSON.parse(localStorage.getItem("chat-app-user")));
-        setIsLoaded(true);
+        setCurrentUser(
+          await JSON.parse(
+            localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
+          )
+        );
       }
     };
+
     fetchUser();
   }, [navigate]);
 
@@ -30,6 +36,10 @@ const Chat = () => {
     if (currentUser) {
       socket.current = io(host);
       socket.current.emit("add-user", currentUser._id);
+
+      return () => {
+        socket.current.disconnect();
+      };
     }
   }, [currentUser]);
 
@@ -37,14 +47,15 @@ const Chat = () => {
     const fetchContacts = async () => {
       if (currentUser) {
         if (currentUser.isAvatarImageSet) {
-          const { data } = await axios.get(`${allUsersRoute}/${currentUser._id}`);
-          setContacts(data);
+          const data = await axios.get(`${allUsersRoute}/${currentUser._id}`);
+          setContacts(data.data);
         } else {
           navigate("/setAvatar");
         }
       }
     };
-    fetchContacts(); // Call the function here
+
+    fetchContacts();
   }, [currentUser, navigate]);
 
   const handleChatChange = (chat) => {
@@ -54,20 +65,21 @@ const Chat = () => {
   return (
     <>
       <Container>
+        <TopBar>
+          <Logout />
+        </TopBar>
         <div className="container">
-          <Contacts contacts={contacts} currentUser={currentUser} changeChat={handleChatChange} />
-          {isLoaded && currentChat === undefined ? (
+          <Contacts contacts={contacts} changeChat={handleChatChange} />
+          {currentChat === undefined ? (
             <Welcome />
           ) : (
-            <ChatContainer currentChat={currentChat} currentUser={currentUser}
-             socket={socket}
-            />
+            <ChatContainer currentChat={currentChat} socket={socket} />
           )}
         </div>
       </Container>
     </>
   );
-};
+}
 
 const Container = styled.div`
   height: 100vh;
@@ -93,5 +105,10 @@ const Container = styled.div`
   }
 `;
 
-
-export default Chat;
+const TopBar = styled.div`
+  width: 85vw;
+  display: flex;
+  justify-content: flex-end;
+  padding: 1rem;
+  background-color: white;
+`;

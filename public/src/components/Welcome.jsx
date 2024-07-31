@@ -8,23 +8,30 @@ export default function Welcome() {
 
   useEffect(() => {
     const fetchUserName = async () => {
-      const user = await JSON.parse(localStorage.getItem('chat-app-user'));
-      setUserName(user.username);
+      try {
+        const user = JSON.parse(localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY));
+        if (user) {
+          setUserName(user.username);
+        } else {
+          console.error("User data not found in local storage");
+        }
+      } catch (error) {
+        console.error("Error retrieving user data:", error);
+      }
     };
     fetchUserName();
   }, []);
 
   return (
     <Container>
-      <div className="logout-button">
-        <Logout />
-      </div>
       <img src={Robot} alt="Robot" />
       <h1>
         Welcome, <span>{userName}!</span>
       </h1>
       <h3>Please select a chat to start messaging.</h3>
+      
     </Container>
+   
   );
 }
 
@@ -40,11 +47,5 @@ const Container = styled.div`
   }
   span {
     color: #4e0eff;
-  }
-  .logout-button {
-    position: absolute;
-    top: 10px;
-    right: 10px; 
-    transform: scale(1.5);
   }
 `;
