@@ -1,7 +1,7 @@
-
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
+const path = require("path");
 const messageRoutes = require("./routes/messageRoutes");
 const userRoutes = require("./routes/userRoutes");
 const app = express();
@@ -17,7 +17,7 @@ mongoose
     useUnifiedTopology: true,
   })
   .then(() => {
-    console.log("DB Connetion Successfull");
+    console.log("DB Connection Successful");
   })
   .catch((err) => {
     console.log(err.message);
@@ -30,12 +30,21 @@ app.get("/ping", (_req, res) => {
 app.use("/api/auth", userRoutes);
 app.use("/api/messages", messageRoutes);
 
-const server = app.listen(process.env.PORT, () =>
-  console.log(`Server started on ${process.env.PORT}`)
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname, "../public/build")));
+
+  app.get("*", (req, res) => {
+    res.sendFile(path.resolve(__dirname, "../public", "build", "index.html"));
+  });
+}
+
+const server = app.listen(process.env.PORT || 5000, () =>
+  console.log(`Server started on ${process.env.PORT || 5000}`)
 );
+
 const io = socket(server, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: process.env.FRONTEND_URL || "http://localhost:3000",
     credentials: true,
   },
 });
